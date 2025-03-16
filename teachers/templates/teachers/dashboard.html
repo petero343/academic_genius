@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mx-auto p-8">
+    <h2 class="text-3xl font-bold mb-4">Teacher Dashboard</h2>
+
+    <h3 class="text-xl font-semibold">Your Assigned Subjects:</h3>
+    <ul class="list-disc ml-6 mb-4">
+        {% for subject in assigned_subjects %}
+            <li>{{ subject.name }}</li>
+        {% endfor %}
+    </ul>
+
+    <h3 class="text-xl font-semibold">Your Students:</h3>
+    <table class="w-full border-collapse border border-gray-300">
+        <thead>
+            <tr class="bg-gray-200">
+                <th class="border p-2">Name</th>
+                <th class="border p-2">Admission Number</th>
+                <th class="border p-2">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td class="border p-2">{{ student.first_name }} {{ student.last_name }}</td>
+                <td class="border p-2">{{ student.adm_number }}</td>
+                <td class="border p-2">
+                    <a href="{% url 'add_results' student.adm_number %}" class="text-blue-500">Add/Edit Results</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3" class="text-center p-4">No students found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

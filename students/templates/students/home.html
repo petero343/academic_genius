@@ -1,0 +1,18 @@
+{% load static %}  <!-- ✅ Load static files -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home | AcGen Results</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">  <!-- ✅ Example for CSS -->
+</head>
+<body>
+    <h1>Welcome to AcGen Results Management System</h1>
+    <p>Manage students, results, and more.</p>
+    <a href="{% url 'student_login' %}">Student Login</a>  |  
+    <a href="{% url 'teacher_login' %}">Teacher Login</a>  |  
+    <a href="{% url 'admin:index' %}">Admin Dashboard</a>
+</body>
+</html>

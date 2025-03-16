@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto p-6">
+    <h2 class="text-2xl font-bold mb-4">Teacher Profile - Select Subjects</h2>
+    
+    <form method="POST">
+        {% csrf_token %}
+        
+        <label for="assigned_subjects" class="block text-lg font-semibold">Select Subjects:</label>
+        <select name="assigned_subjects" id="assigned_subjects" multiple class="border p-2 w-full">
+            {% for course in all_courses %}
+                <option value="{{ course.id }}" {% if course in teacher.assigned_subjects.all %} selected {% endif %}>
+                    {{ course.name }}
+                </option>
+            {% endfor %}
+        </select>
+        
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 mt-3 rounded">Save</button>
+    </form>
+</div>
+{% endblock %}

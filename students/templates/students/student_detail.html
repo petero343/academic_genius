@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student List</title>
+</head>
+<body>
+    <h1>Student List</h1>
+    <ul>
+        {% for student in students %}
+            <li>
+                <a href="{% url 'student_detail' student.adm_number %}">
+                    {{ student.name }} ({{ student.adm_number }})
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+<a href="{% url 'generate_results_report' student.adm_number %}" target="_blank">
+    Download Results Report (PDF)
+</a>
+
+<a href="{% url 'generate_report_card' student.adm_number %}" target="_blank">
+    Download Report Card (PDF)
+</a>
+</html>
+
