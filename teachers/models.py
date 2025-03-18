@@ -20,12 +20,14 @@ class TeacherManager(BaseUserManager):
         return self.create_user(id_number, password, **extra_fields)
 
 # ✅ Custom Teacher Model (AUTH_USER_MODEL)
-class Teacher(AbstractUser):
-    username = None  # Remove default username field
-    id_number = models.CharField(max_length=20, unique=True)  # Login using ID
-    email = models.EmailField(unique=True)  # Email for communication
-    assigned_subjects = models.ManyToManyField("students.Course", blank=True)
+class Teacher(models.Model):
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    id_number = models.CharField(max_length=20, unique=True)
+    email = models.EmailField(unique=True)
+    assigned_subjects = models.ManyToManyField('Course')
     date_joined = models.DateTimeField(auto_now_add=True)
+
 
     # ✅ Permissions
     groups = models.ManyToManyField(Group, related_name="teacher_groups", blank=True)
@@ -43,3 +45,10 @@ class Teacher(AbstractUser):
     class Meta:
         verbose_name = "Teacher"
         verbose_name_plural = "Teachers"
+
+class Course(models.Model):
+    name = models.CharField(max_length=200)
+    code = models.CharField(max_length=20, unique=True)
+
+    def __str__(self):
+        return self.name

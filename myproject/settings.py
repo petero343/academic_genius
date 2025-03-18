@@ -28,9 +28,10 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 AUTHENTICATION_BACKENDS = [
-    'teachers.auth_backend.TeacherAuthBackend',  # ✅ Custom backend for teachers
-   # 'django.contrib.auth.backends.ModelBackend',  # ✅ Default for other users
+    "myproject.auth_backends.CustomUserBackend",  # Ensure this points to the correct path
+    "django.contrib.auth.backends.ModelBackend",  # Default Django authentication
 ]
+
 
 
 
@@ -45,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'students',
     'teachers',
+    'users'
 ]
 
 MIDDLEWARE = [
@@ -98,7 +100,7 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_SAVE_EVERY_REQUEST = True
 
 
-AUTH_USER_MODEL = "teachers.Teacher"
+AUTH_USER_MODEL = 'users.CustomUser'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -148,6 +150,6 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"  # Use your email provider
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = "your-email@gmail.com"  # Your email
-EMAIL_HOST_PASSWORD = "your-email-password"  # App password (if using Gmail)
-DEFAULT_FROM_EMAIL = "your-email@gmail.com"
+EMAIL_HOST_USER = "peterkaryukey2@gmail.com"  # Your email
+EMAIL_HOST_PASSWORD = "@96ppeterzz"  # App password (if using Gmail)
+DEFAULT_FROM_EMAIL = "peterkaryukey@gmail.com"

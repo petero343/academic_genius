@@ -120,36 +120,32 @@ def generate_results_report(request, adm_number):
 # ✅ Student Dashboard
 @login_required
 def student_dashboard(request):
-    student = get_object_or_404(Student, adm_number=request.user.username)
-    results = Result.objects.filter(student=student)
+    if not hasattr(request.user, 'student'):  # Ensure only students access this view
+        return redirect('student_login')
 
-    subjects = [result.course.name for result in results]  
-    grades = [int(result.grade) for result in results] if results else []
+    student = request.user.student  # Get logged-in student's details
+    results = Result.objects.filter(student=student)  # Fetch student results
 
     context = {
-        "student": student,
-        "results": results,
-        "subjects": subjects,
-        "grades": grades,
+        'student': student,
+        'results': results,
     }
-    return render(request, "students/dashboard.html", context)
-
+    return render(request, 'students/dashboard.html', context)
 
 # ✅ Student Login
 def student_login(request):
     if request.method == "POST":
-        username = request.POST["username"]
-        password = request.POST["password"]
+        username = request.POST['username']  # Admission number as username
+        password = request.POST['password']
         user = authenticate(request, username=username, password=password)
 
         if user is not None and hasattr(user, 'student'):  # Ensure it's a student
             login(request, user)
-            return redirect("student_dashboard")
+            return redirect('student_dashboard')
         else:
-            messages.error(request, "Invalid username or password")
+            return render(request, 'students/login.html', {'error': 'Invalid credentials'})
 
-    return render(request, "students/login.html")
-
+    return render(request, 'students/login.html')
 
 # ✅ User Logout
 def user_logout(request):
@@ -194,3 +190,25 @@ def view_results(request):
     student = get_object_or_404(Student, user=request.user)
     results = Result.objects.filter(student=student)
     return render(request, "students/view_results.html", {"student": student, "results": results})
+
+# students/views.py
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from .models import Student, Result
+from .utils import send_results_notification  # ✅ Import function
+
+def add_results(request, student_id):
+    student = get_object_or_404(Student, id=student_id)
+
+    if request.method == "POST":
+        course = request.POST["course"]
+        grade = request.POST["grade"]
+        Result.objects.create(student=student, course_id=course, grade=grade)
+        
+        # ✅ Send email notification after adding results
+        send_results_notification(student)
+
+        messages.success(request, "Results added successfully!")
+        return redirect("teacher_dashboard")  # Redirect back
+
+    return render(request, "students/add_results.html", {"student": student})

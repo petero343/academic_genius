@@ -1,12 +1,13 @@
 from django.db import models
 from django.contrib.auth.models import User, Group, Permission
+from django.conf import settings
 
 class Student(models.Model):
     adm_number = models.CharField(max_length=20, unique=True)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
-    email = models.EmailField(unique=True)
     dob = models.DateField()
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)  
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
@@ -41,19 +42,3 @@ class Result(models.Model):
     def __str__(self):
         return f"{self.student} - {self.course} - {self.grade}"
 
-from django.contrib.auth.models import AbstractUser
-from django.db import models
-
-class CustomUser(AbstractUser):
-    ROLE_CHOICES = [
-        ("student", "Student"),
-        ("admin", "Admin"),
-        ("staff", "Staff"),
-    ]
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='student')
-
-    groups = models.ManyToManyField(Group, related_name="students_customuser_groups", blank=True)
-    user_permissions = models.ManyToManyField(Permission, related_name="students_customuser_permissions", blank=True)
-
-    def __str__(self):
-        return f"{self.username} ({self.role})"
