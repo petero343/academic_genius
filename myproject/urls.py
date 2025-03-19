@@ -6,10 +6,9 @@ urlpatterns = [
     path("admin/", admin.site.urls),
 
     # ✅ Home Page
-    path("", include("students.urls")),  # Home handled in students
 
     # ✅ Student URLs
-    path("students/", include("students.urls")),
+    path("students/", include(("students.urls", "students"))),  # ✅ Namespace defined here
 
     # ✅ Teacher URLs
     path("teachers/", include("teachers.urls")),

@@ -1,4 +1,10 @@
 <!DOCTYPE html>
+<form method="POST">
+    {% csrf_token %}
+    <!-- Other form fields -->
+    <button type="submit">Submit</button>
+</form>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -29,7 +35,7 @@
         <aside class="w-64 bg-blue-900 text-white p-6 flex flex-col space-y-6">
             <h1 class="text-2xl font-bold">Student Portal</h1>
             <nav class="flex flex-col space-y-4">
-                <a href="{% url 'home' %}" class="hover:bg-blue-700 p-2 rounded">🏠 Home</a>
+                <a href="{% url 'students:home' %}">Home</a>  
                 <a href="{% url 'student_dashboard' %}" class="hover:bg-blue-700 p-2 rounded">📊 Dashboard</a>
                 <a href="{% url 'generate_results_report' student.adm_number %}" class="hover:bg-blue-700 p-2 rounded"> 📖 Download_Results</a>
                 <a href="{% url 'generate_report_card' student.adm_number %}" class="hover:bg-blue-700 p-2 rounded">📜 Details Card</a>

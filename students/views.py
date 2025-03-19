@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
+from django.conf import settings
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.colors import blue, black, red, lightgrey
@@ -10,29 +11,133 @@ from reportlab.lib.utils import ImageReader
 from reportlab.platypus import Table, TableStyle
 from reportlab.lib import colors
 import os
-from django.conf import settings
 
+from users.models import CustomUser
 from .models import Student, Result, Course
+from .utils import send_results_notification  # ✅ Import function
+
+
+# ✅ Home View
+def home(request):
+    return render(request, "home.html")
 
 
 # ✅ List all students
 def student_list(request):
     students = Student.objects.all()
-    return render(request, 'students/student_list.html', {'students': students})
+    return render(request, "students/student_list.html", {"students": students})
 
 
 # ✅ View individual student details
 def student_detail(request, adm_number):
     student = get_object_or_404(Student, adm_number=adm_number)
-    return render(request, 'students/student_detail.html', {'student': student})
+    return render(request, "students/student_detail.html", {"student": student})
+
+
+# ✅ Student Login
+def student_login(request):
+    print("✅ student_login function called!")  # Debugging
+
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        print(f"🔹 Username: {username}, Password: {password}")
+
+        user = authenticate(request, username=username, password=password)
+
+        if user:
+            login(request, user)
+            print(f"🔹 SESSION DATA AFTER LOGIN: {request.session.items()}")
+            print(f"✅ Authentication successful! Redirecting {username} to dashboard.")
+            return redirect("students:student_dashboard")  # ✅ Ensure correct URL name
+        else:
+            messages.error(request, "❌ Invalid username or password")
+            print("❌ Authentication failed!")
+
+    return render(request, "students/login.html")
+
+
+# ✅ Student Dashboard
+@login_required(login_url="students:student_login")
+def student_dashboard(request):
+    print(f"✅ student_dashboard function called!")
+    print(f"✅ Logged-in User: {request.user.username}, Authenticated: {request.user.is_authenticated}")
+
+    student = get_object_or_404(Student, user=request.user)
+    results = Result.objects.filter(student=student)
+
+    context = {
+        "student": student,
+        "results": results,
+    }
+    return render(request, "students/dashboard.html", context)
+
+
+# ✅ User Logout
+def user_logout(request):
+    logout(request)
+    return redirect("students:student_login")
+
+
+# ✅ Helper function to check if user is an admin
+def is_admin(user):
+    return user.is_authenticated and user.role == "admin"
+
+
+# ✅ Helper function to check if user is a teacher
+def is_teacher(user):
+    return user.is_authenticated and user.role == "teacher"
+
+
+# ✅ Helper function to check if user is a student or parent
+def is_student_or_parent(user):
+    return user.is_authenticated and user.role in ["student", "parent"]
+
+
+# ✅ Admin-only view (Manage students)
+@login_required
+@user_passes_test(is_admin)
+def manage_students(request):
+    students = Student.objects.all()
+    return render(request, "students/manage_students.html", {"students": students})
+
+
+# ✅ Teachers can add/edit results
+@login_required
+@user_passes_test(is_teacher)
+def add_results(request, student_id):
+    student = get_object_or_404(Student, id=student_id)
+
+    if request.method == "POST":
+        course = request.POST["course"]
+        grade = request.POST["grade"]
+        Result.objects.create(student=student, course_id=course, grade=grade)
+
+        # ✅ Send email notification after adding results
+        send_results_notification(student)
+
+        messages.success(request, "Results added successfully!")
+        return redirect("teacher_dashboard")  # Redirect back
+
+    return render(request, "students/add_results.html", {"student": student})
+
+
+# ✅ Students/Parents can only view their own results
+@login_required
+@user_passes_test(is_student_or_parent)
+def view_results(request):
+    student = get_object_or_404(Student, user=request.user)
+    results = Result.objects.filter(student=student)
+    return render(request, "students/view_results.html", {"student": student, "results": results})
 
 
 # ✅ Generate PDF Report Card
+@login_required(login_url="students:student_login")
 def generate_report_card(request, adm_number):
     student = get_object_or_404(Student, adm_number=adm_number)
 
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="Report_Card_{student.adm_number}.pdf"'
+    response = HttpResponse(content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="Report_Card_{student.adm_number}.pdf"'
 
     p = canvas.Canvas(response)
     p.setFont("Helvetica", 16)
@@ -51,18 +156,19 @@ def generate_report_card(request, adm_number):
 
 
 # ✅ Generate Student Results PDF
+@login_required(login_url="students:student_login")
 def generate_results_report(request, adm_number):
     student = get_object_or_404(Student, adm_number=adm_number)
     results = Result.objects.filter(student=student)
 
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="Results_{student.adm_number}.pdf"'
+    response = HttpResponse(content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="Results_{student.adm_number}.pdf"'
 
     p = canvas.Canvas(response, pagesize=letter)
     width, height = letter
 
     # 🏫 **School Logo**
-    logo_path = os.path.join(settings.BASE_DIR, "students/static/images/logo.png")  
+    logo_path = os.path.join(settings.BASE_DIR, "students/static/images/logo.png")
     if os.path.exists(logo_path):
         p.drawImage(ImageReader(logo_path), width / 2 - 50, height - 100, width=100, height=100)
 
@@ -97,118 +203,20 @@ def generate_results_report(request, adm_number):
     # ✏️ **Table Style**
     table = Table(table_data, colWidths=[300, 100])
     table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("BOTTOMPADDING", (0, 0), (-1, 0), 12),
+        ("BACKGROUND", (0, 1), (-1, -1), colors.beige),
+        ("GRID", (0, 0), (-1, -1), 1, colors.black),
     ]))
 
     # 📌 **Draw Table**
     table.wrapOn(p, width, height)
     table.drawOn(p, 100, height - 280)
 
-    # 🔚 **Close PDF document**
     p.showPage()
     p.save()
 
     return response
-
-
-# ✅ Student Dashboard
-@login_required
-def student_dashboard(request):
-    if not hasattr(request.user, 'student'):  # Ensure only students access this view
-        return redirect('student_login')
-
-    student = request.user.student  # Get logged-in student's details
-    results = Result.objects.filter(student=student)  # Fetch student results
-
-    context = {
-        'student': student,
-        'results': results,
-    }
-    return render(request, 'students/dashboard.html', context)
-
-# ✅ Student Login
-def student_login(request):
-    if request.method == "POST":
-        username = request.POST['username']  # Admission number as username
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
-
-        if user is not None and hasattr(user, 'student'):  # Ensure it's a student
-            login(request, user)
-            return redirect('student_dashboard')
-        else:
-            return render(request, 'students/login.html', {'error': 'Invalid credentials'})
-
-    return render(request, 'students/login.html')
-
-# ✅ User Logout
-def user_logout(request):
-    logout(request)
-    return redirect("student_login")
-
-
-# ✅ Helper function to check if user is an admin
-def is_admin(user):
-    return user.is_authenticated and user.role == "admin"
-
-
-# ✅ Helper function to check if user is a teacher
-def is_teacher(user):
-    return user.is_authenticated and user.role == "teacher"
-
-
-# ✅ Helper function to check if user is a student or parent
-def is_student_or_parent(user):
-    return user.is_authenticated and user.role in ["student", "parent"]
-
-
-# ✅ Admin-only view (Manage students)
-@login_required
-@user_passes_test(is_admin)
-def manage_students(request):
-    students = Student.objects.all()
-    return render(request, "students/manage_students.html", {"students": students})
-
-
-# ✅ Teachers can add/edit results
-@login_required
-@user_passes_test(is_teacher)
-def add_results(request):
-    return render(request, "students/add_results.html")
-
-
-# ✅ Students/Parents can only view their own results
-@login_required
-@user_passes_test(is_student_or_parent)
-def view_results(request):
-    student = get_object_or_404(Student, user=request.user)
-    results = Result.objects.filter(student=student)
-    return render(request, "students/view_results.html", {"student": student, "results": results})
-
-# students/views.py
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib import messages
-from .models import Student, Result
-from .utils import send_results_notification  # ✅ Import function
-
-def add_results(request, student_id):
-    student = get_object_or_404(Student, id=student_id)
-
-    if request.method == "POST":
-        course = request.POST["course"]
-        grade = request.POST["grade"]
-        Result.objects.create(student=student, course_id=course, grade=grade)
-        
-        # ✅ Send email notification after adding results
-        send_results_notification(student)
-
-        messages.success(request, "Results added successfully!")
-        return redirect("teacher_dashboard")  # Redirect back
-
-    return render(request, "students/add_results.html", {"student": student})

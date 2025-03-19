@@ -28,7 +28,7 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 AUTHENTICATION_BACKENDS = [
-    "myproject.auth_backends.CustomUserBackend",  # Ensure this points to the correct path
+    "users.auth_backends.CustomUserBackend",  # Ensure this points to the correct path
     "django.contrib.auth.backends.ModelBackend",  # Default Django authentication
 ]
 
@@ -40,6 +40,7 @@ AUTHENTICATION_BACKENDS = [
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
+    "django_extensions",
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -99,6 +100,8 @@ SESSION_COOKIE_AGE = 86400  # 1 day (optional)
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_SAVE_EVERY_REQUEST = True
 
+LOGIN_REDIRECT_URL = "/dashboard/"
+LOGOUT_REDIRECT_URL = "/login/"
 
 AUTH_USER_MODEL = 'users.CustomUser'
 
