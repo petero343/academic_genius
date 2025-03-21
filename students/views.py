@@ -16,49 +16,33 @@ from users.models import CustomUser
 from .models import Student, Result, Course
 from .utils import send_results_notification  # ✅ Import function
 
-
 # ✅ Home View
 def home(request):
-    return render(request, "home.html")
-
-
-# ✅ List all students
-def student_list(request):
-    students = Student.objects.all()
-    return render(request, "students/student_list.html", {"students": students})
-
-
-# ✅ View individual student details
-def student_detail(request, adm_number):
-    student = get_object_or_404(Student, adm_number=adm_number)
-    return render(request, "students/student_detail.html", {"student": student})
-
+    return render(request, "students/home.html")
 
 # ✅ Student Login
 def student_login(request):
-    print("✅ student_login function called!")  # Debugging
+    print("✅ student_login function called!")
 
     if request.method == "POST":
         username = request.POST.get("username")
         password = request.POST.get("password")
-        print(f"🔹 Username: {username}, Password: {password}")
 
         user = authenticate(request, username=username, password=password)
 
         if user:
             login(request, user)
-            print(f"🔹 SESSION DATA AFTER LOGIN: {request.session.items()}")
+            request.session.save()  # ✅ Ensure session is saved
             print(f"✅ Authentication successful! Redirecting {username} to dashboard.")
-            return redirect("students:student_dashboard")  # ✅ Ensure correct URL name
+            return redirect("student_dashboard")  # ✅ No namespaces used
         else:
             messages.error(request, "❌ Invalid username or password")
             print("❌ Authentication failed!")
 
     return render(request, "students/login.html")
 
-
 # ✅ Student Dashboard
-@login_required(login_url="students:student_login")
+@login_required(login_url="student_login")
 def student_dashboard(request):
     print(f"✅ student_dashboard function called!")
     print(f"✅ Logged-in User: {request.user.username}, Authenticated: {request.user.is_authenticated}")
@@ -66,45 +50,56 @@ def student_dashboard(request):
     student = get_object_or_404(Student, user=request.user)
     results = Result.objects.filter(student=student)
 
+    # Extract subjects and grades for Chart.js
+    subjects = [result.course.name for result in results]
+    grades = [int(result.grade) for result in results]
+
     context = {
         "student": student,
-        "results": results,
+        "subjects": subjects,
+        "grades": grades,
     }
     return render(request, "students/dashboard.html", context)
-
-
-# ✅ User Logout
+# ✅ Logout View
+@login_required(login_url="student_login")
 def user_logout(request):
     logout(request)
-    return redirect("students:student_login")
+    return redirect("student_login")
 
-
-# ✅ Helper function to check if user is an admin
-def is_admin(user):
-    return user.is_authenticated and user.role == "admin"
-
-
-# ✅ Helper function to check if user is a teacher
-def is_teacher(user):
-    return user.is_authenticated and user.role == "teacher"
-
-
-# ✅ Helper function to check if user is a student or parent
-def is_student_or_parent(user):
-    return user.is_authenticated and user.role in ["student", "parent"]
-
-
-# ✅ Admin-only view (Manage students)
-@login_required
-@user_passes_test(is_admin)
-def manage_students(request):
+# ✅ List all students
+@login_required(login_url="student_login")
+def student_list(request):
     students = Student.objects.all()
-    return render(request, "students/manage_students.html", {"students": students})
+    return render(request, "students/student_list.html", {"students": students})
 
+@login_required
+def report_card_preview(request, adm_number):
+    student = get_object_or_404(Student, adm_number=adm_number)
+    return render(request, "students/report_card_preview.html", {"student": student})
+
+# ✅ Results Preview
+@login_required
+def results_preview(request, adm_number):
+    student = get_object_or_404(Student, adm_number=adm_number)
+    results = Result.objects.filter(student=student)
+    return render(request, "students/results_preview.html", {"student": student, "results": results})
+
+# ✅ View individual student details
+@login_required(login_url="student_login")
+def student_detail(request, adm_number):
+    student = get_object_or_404(Student, adm_number=adm_number)
+    return render(request, "students/student_detail.html", {"student": student})
+
+# ✅ View Results
+@login_required(login_url="student_login")
+def view_results(request):
+    student = get_object_or_404(Student, user=request.user)
+    results = Result.objects.filter(student=student)
+    return render(request, "students/view_results.html", {"student": student, "results": results})
 
 # ✅ Teachers can add/edit results
-@login_required
-@user_passes_test(is_teacher)
+@login_required(login_url="student_login")
+@user_passes_test(lambda user: user.is_authenticated and user.role == "teacher")
 def add_results(request, student_id):
     student = get_object_or_404(Student, id=student_id)
 
@@ -113,26 +108,15 @@ def add_results(request, student_id):
         grade = request.POST["grade"]
         Result.objects.create(student=student, course_id=course, grade=grade)
 
-        # ✅ Send email notification after adding results
-        send_results_notification(student)
+        send_results_notification(student)  # ✅ Send email notification
 
         messages.success(request, "Results added successfully!")
-        return redirect("teacher_dashboard")  # Redirect back
+        return redirect("teacher_dashboard")  
 
     return render(request, "students/add_results.html", {"student": student})
 
-
-# ✅ Students/Parents can only view their own results
-@login_required
-@user_passes_test(is_student_or_parent)
-def view_results(request):
-    student = get_object_or_404(Student, user=request.user)
-    results = Result.objects.filter(student=student)
-    return render(request, "students/view_results.html", {"student": student, "results": results})
-
-
 # ✅ Generate PDF Report Card
-@login_required(login_url="students:student_login")
+@login_required(login_url="student_login")
 def generate_report_card(request, adm_number):
     student = get_object_or_404(Student, adm_number=adm_number)
 
@@ -145,18 +129,13 @@ def generate_report_card(request, adm_number):
     p.setFont("Helvetica", 12)
     p.drawString(100, 780, f"Name: {student.first_name} {student.last_name}")
     p.drawString(100, 760, f"Admission Number: {student.adm_number}")
-    p.drawString(100, 740, f"Email: {student.email}")
-    p.drawString(100, 720, f"Date of Birth: {student.dob}")
-    p.drawString(100, 700, f"Age: {student.calculate_age()}")
 
     p.showPage()
     p.save()
-
     return response
 
-
 # ✅ Generate Student Results PDF
-@login_required(login_url="students:student_login")
+@login_required(login_url="student_login")
 def generate_results_report(request, adm_number):
     student = get_object_or_404(Student, adm_number=adm_number)
     results = Result.objects.filter(student=student)
@@ -174,7 +153,7 @@ def generate_results_report(request, adm_number):
 
     # 🎯 **Title Section**
     p.setFillColor(lightgrey)
-    p.rect(50, height - 136, width - 70, 40, fill=True, stroke=False)
+    p.rect(50, height - 160, width - 70, 40, fill=True, stroke=False)
     p.setFillColor(blue)
     p.setFont("Helvetica-Bold", 20)
     p.drawString(180, height - 120, "Student Results Report")
@@ -193,7 +172,7 @@ def generate_results_report(request, adm_number):
     p.drawString(100, height - 230, "Results:")
 
     # 📝 **Prepare Table Data**
-    table_data = [["Course", "Grade"]]  # Table Headers
+    table_data = [["Course", "Grade"]]
     for result in results:
         table_data.append([result.course.name, result.grade])
 
@@ -218,5 +197,4 @@ def generate_results_report(request, adm_number):
 
     p.showPage()
     p.save()
-
     return response

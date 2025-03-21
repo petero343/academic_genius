@@ -6,13 +6,131 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home | AcGen Results</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">  <!-- ✅ Example for CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">  <!-- ✅ External CSS -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>  <!-- ✅ Icons -->
+
+    <style>
+        /* ✅ General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #E3F2FD;
+            margin: 0;
+            padding: 0;
+            color: #0D17A1;
+            text-align: center;
+        }
+
+        /* ✅ Header Section */
+        .header {
+            background-color: #013062;
+            padding: 30px;
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .motto {
+            font-size: 18px;
+            font-style: italic;
+        }
+
+        /* ✅ Main Content */
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+            color: #0D47A1;
+        }
+
+        p {
+            font-size: 18px;
+            color: #333;
+        }
+
+        /* ✅ Buttons */
+        .btn {
+            display: inline-block;
+            padding: 15px 25px;
+            font-size: 18px;
+            font-weight: bold;
+            text-decoration: none;
+            color: white;
+            border-radius: 5px;
+            transition: 0.3s;
+            margin: 10px;
+        }
+
+        .btn-login { background-color: #1E88E5; }
+        .btn-login:hover { background-color: #0D47A1; }
+
+        .btn-teacher { background-color: #00897B; }
+        .btn-teacher:hover { background-color: #00695C; }
+
+        .btn-admin { background-color: #D84315; }Ff8443
+        .btn-admin:hover { background-color: #D01315; }
+
+        /* ✅ Footer */
+        .footer {
+            background-color: #0D47A1;
+            color: white;
+            padding: 15px;
+            margin-top: 30px;
+            font-size: 16px;
+        }
+
+        .footer a {
+            color: #FFEB3B;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+    </style>
 </head>
 <body>
-    <h1>Welcome to AcGen Results Management System</h1>
-    <p>Manage students, results, and more.</p>
-    <a href="{% url 'student_login' %}">Student Login</a>  |  
-    <a href="{% url 'teacher_login' %}">Teacher Login</a>  |  
-    <a href="{% url 'admin:index' %}">Admin Dashboard</a>
+
+    <!-- ✅ Header Section -->
+    <div class="header">
+        <img src="{% static 'images/logo.png' %}" alt="Shiners Academy Logo" width="100">
+        <div>Shiners Academy</div>
+        <div class="motto">"Shining Bright in Excellence"</div>
+    </div>
+
+    <!-- ✅ Main Content -->
+    <div class="container">
+        <h1>Welcome to AcGen Results Management System</h1>
+        <p>Effortlessly manage students, results, and academic performance.</p>
+        
+        <!-- ✅ Buttons with Icons -->
+        <a href="{% url 'student_login' %}" class="btn btn-login">
+            <i class="fas fa-user-graduate"></i> Student Login
+        </a>
+        <a href="{% url 'teacher_login' %}" class="btn btn-teacher">
+            <i class="fas fa-chalkboard-teacher"></i> Teacher Login
+        </a>
+        <a href="{% url 'custom_admin_login' %}" class="btn btn-admin">
+            <i class="fas fa-user-shield"></i> Admin Dashboard
+        </a>
+    </div>
+
+    <!-- ✅ Footer Section -->
+    <div class="footer">
+        &copy; 2025 Shiners Academy. All Rights Reserved. |
+        <a href="#">Privacy Policy</a> |
+        <a href="#">Terms of Service</a> |
+        <a href="#">Help & Support</a>
+    </div>
+
 </body>
 </html>

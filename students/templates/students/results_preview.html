@@ -1,0 +1,60 @@
+{% extends "students/base.html" %}
+{% block content %}
+
+<div class="max-w-5xl mx-auto p-6">
+    <!-- Header -->
+    <h2 class="text-3xl font-bold text-[#1E3A8A] flex items-center gap-2">
+        📊 Student Results Preview
+    </h2>
+
+    <!-- Student Information Card -->
+    <div class="bg-white shadow-lg rounded-xl p-6 mt-6 border-l-8 border-[#1E3A8A] transition hover:shadow-2xl">
+        <p class="text-lg font-semibold text-gray-700">
+            <strong>Admission Number:</strong> {{ student.adm_number }}
+        </p>
+        <p class="text-lg font-semibold text-gray-700">
+            <strong>Name:</strong> {{ student.first_name }} {{ student.last_name }}
+        </p>
+    </div>
+
+    <!-- Results Table -->
+    <div class="mt-8 bg-white shadow-lg rounded-xl p-6">
+        <h3 class="text-2xl font-semibold text-[#1E3A8A] flex items-center gap-2">📌 Results</h3>
+        
+        <div class="overflow-x-auto mt-4">
+            <table class="min-w-full border-collapse border border-gray-300 shadow-md">
+                <thead>
+                    <tr class="bg-[#1E3A8A] text-white text-lg">
+                        <th class="border p-3">📚 Course</th>
+                        <th class="border p-3">🏆 Grade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                    <tr class="hover:bg-blue-100 transition-all duration-200">
+                        <td class="border p-3 text-center text-gray-700 font-medium">{{ result.course.name }}</td>
+                        <td class="border p-3 text-center text-lg font-bold text-gray-800">{{ result.grade }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2" class="text-center text-gray-600 p-4">
+                            ❌ No results available
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Download Button -->
+    <div class="text-center mt-6">
+        <a href="{% url 'generate_results_report' student.adm_number %}" 
+            class="inline-block bg-[#1E3A8A] text-white px-6 py-3 rounded-lg text-lg font-bold 
+                   hover:bg-[#0F256E] transition transform hover:scale-105 shadow-md">
+            ⬇️ Download Results Report
+        </a>
+    </div>
+</div>
+
+{% endblock %}

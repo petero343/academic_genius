@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser, BaseUserManager, Permission, Group
 from django.db import models
+from users.models import CustomUser
 
 # ✅ Custom Manager for Teachers
 class TeacherManager(BaseUserManager):
@@ -25,16 +26,27 @@ class Teacher(models.Model):
     last_name = models.CharField(max_length=100)
     id_number = models.CharField(max_length=20, unique=True)
     email = models.EmailField(unique=True)
-    assigned_subjects = models.ManyToManyField('Course')
-    date_joined = models.DateTimeField(auto_now_add=True)
+    assigned_subjects = models.ManyToManyField("students.Course")
+    date_joined = models.DateField(auto_now_add=True)
 
+    def save(self, *args, **kwargs):
+        """ Automatically create a user account for a teacher upon saving. """
+        creating = self._state.adding  # Check if it's a new teacher
+        super().save(*args, **kwargs)
 
-    # ✅ Permissions
-    groups = models.ManyToManyField(Group, related_name="teacher_groups", blank=True)
-    user_permissions = models.ManyToManyField(Permission, related_name="teacher_permissions", blank=True)
-
-    # ✅ Define custom manager
-    objects = TeacherManager()
+        if creating:
+            # ✅ Create a linked user account
+            user, created = CustomUser.objects.get_or_create(
+                username=self.id_number,  # Use ID as the username
+                defaults={
+                    "first_name": self.first_name,
+                    "last_name": self.last_name,
+                    "email": self.email,
+                    "role": "teacher",
+                },
+            )
+            user.set_password("password123")  # Set a default password (Changeable later)
+            user.save()
 
     USERNAME_FIELD = "id_number"  # Teachers log in with ID number
     REQUIRED_FIELDS = ["email", "first_name", "last_name"]

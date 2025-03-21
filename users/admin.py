@@ -1,6 +1,15 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import CustomUser
+from .models import AdminUser
+
+class CustomAdminUser(UserAdmin):
+    model = AdminUser
+    list_display = ("username", "email", "is_staff", "date_created")
+    search_fields = ("username", "email")
+    readonly_fields = ("date_created",)
+
+admin.site.register(AdminUser, CustomAdminUser)  # ✅ Register in Django Admin
 
 class CustomUserAdmin(UserAdmin):
     model = CustomUser

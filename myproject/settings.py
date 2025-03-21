@@ -65,7 +65,8 @@ ROOT_URLCONF = 'myproject.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / "students" / "templates"],        'APP_DIRS': True,
+        "DIRS": [BASE_DIR / "templates"],  # ✅ Make sure Django checks this directory
+        'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',

@@ -138,3 +138,48 @@ def teacher_add_results(request):
         request, "teachers/add_results.html",
         {"teacher": teacher, "students": students, "assigned_subjects": assigned_subjects}
     )
+
+@user_passes_test(is_teacher)
+def view_students(request):
+    teacher = get_object_or_404(Teacher, user=request.user)
+    students = Student.objects.filter(course__teacher=teacher)
+    return render(request, "teachers/view_students.html", {"students": students})
+@user_passes_test(is_teacher)
+def add_results(request, student_id):
+    student = get_object_or_404(Student, id=student_id)
+    
+    if request.method == "POST":
+        course_id = request.POST.get("course")
+        grade = request.POST.get("grade")
+
+        if not course_id or not grade:
+            messages.error(request, "❌ All fields are required!")
+        else:
+            course = get_object_or_404(Course, id=course_id)
+            Result.objects.create(student=student, course=course, grade=grade)
+            messages.success(request, "✅ Results added successfully!")
+
+        return redirect("view_students")  # Redirect back
+
+    courses = Course.objects.all()
+    return render(request, "teachers/add_results.html", {"student": student, "courses": courses})
+
+# ✅ Teachers can edit results
+@login_required
+@user_passes_test(is_teacher)
+def edit_results(request, result_id):
+    result = get_object_or_404(Result, id=result_id)
+
+    if request.method == "POST":
+        grade = request.POST.get("grade")
+
+        if not grade:
+            messages.error(request, "❌ Grade field is required!")
+        else:
+            result.grade = grade
+            result.save()
+            messages.success(request, "✅ Result updated successfully!")
+
+        return redirect("view_students")  # Redirect back
+
+    return render(request, "teachers/edit_results.html", {"result": result})

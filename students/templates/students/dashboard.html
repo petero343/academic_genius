@@ -35,10 +35,10 @@
         <aside class="w-64 bg-blue-900 text-white p-6 flex flex-col space-y-6">
             <h1 class="text-2xl font-bold">Student Portal</h1>
             <nav class="flex flex-col space-y-4">
-                <a href="{% url 'students:home' %}">Home</a>  
+                <a href="{% url 'home' %}" class="hover:bg-blue-700 p-2 rounded">🏠 Back to Home</a>  
                 <a href="{% url 'student_dashboard' %}" class="hover:bg-blue-700 p-2 rounded">📊 Dashboard</a>
-                <a href="{% url 'generate_results_report' student.adm_number %}" class="hover:bg-blue-700 p-2 rounded"> 📖 Download_Results</a>
-                <a href="{% url 'generate_report_card' student.adm_number %}" class="hover:bg-blue-700 p-2 rounded">📜 Details Card</a>
+                <a href="{% url 'results_preview' student.adm_number %}" class="hover:bg-blue-700 p-2 rounded"> 📖 Download Results</a>
+                <a href="{% url 'report_card_preview' student.adm_number %}" class="hover:bg-blue-700 p-2 rounded">📜 Details Card</a>
                 <a href="{% url 'student_login' %}" class="hover:bg-red-500 p-2 rounded">🚪 Logout</a>
             </nav>
         </aside>
@@ -51,7 +51,7 @@
             <div class="mt-6 bg-white shadow-md rounded-lg p-6">
                 <h3 class="text-xl font-semibold text-gray-700">📄 Student Details</h3>
                 <p><strong>Admission Number:</strong> {{ student.adm_number }}</p>
-                <p><strong>Email:</strong> {{ student.email }}</p>
+                <p><strong>Email:</strong> {{ student.user.email }}</p>
                 <p><strong>Date of Birth:</strong> {{ student.dob }}</p>
                 <p><strong>Age:</strong> {{ student.calculate_age }}</p>
             </div>
@@ -70,10 +70,10 @@
         const resultsChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: {{ subjects|safe }},
+                labels: {{ subjects|safe }},  // ✅ Pass subjects from context
                 datasets: [{
                     label: 'Grades',
-                    data: {{ grades|safe }},
+                    data: {{ grades|safe }},  // ✅ Pass grades from context
                     borderColor: 'rgb(30, 136, 229)',
                     backgroundColor: 'rgba(30, 136, 229, 0.2)',
                     borderWidth: 2,
@@ -92,5 +92,6 @@
             }
         });
     </script>
+    
 </body>
 </html>

@@ -68,7 +68,7 @@
         {% endif %}
 
         <!-- ✅ Login Form -->
-        <form method="post" action="{% url 'students:student_login'%}">
+        <form method="post" action="{% url 'student_login'%}">
             {% csrf_token %}
             <div class="form-group">
                 <label for="username">Admission Number:</label>

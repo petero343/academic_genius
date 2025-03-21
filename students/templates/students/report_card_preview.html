@@ -1,0 +1,19 @@
+{% extends "students/base.html" %}
+{% block content %}
+<div class="container mx-auto p-8">
+    <h2 class="text-2xl font-bold text-blue-900">📄 Student Report Card Preview</h2>
+
+    <div class="bg-white shadow-md rounded-lg p-6 mt-4">
+        <p><strong>Admission Number:</strong> {{ student.adm_number }}</p>
+        <p><strong>Name:</strong> {{ student.first_name }} {{ student.last_name }}</p>
+        <p><strong>Date of Birth:</strong> {{ student.dob }}</p>
+        <p><strong>Age:</strong> {{ student.calculate_age }}</p>
+
+        <!-- ✅ Download Button -->
+        <a href="{% url 'generate_report_card' student.adm_number %}" 
+           class="mt-4 inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            ⬇️ Download Report Card
+        </a>
+    </div>
+</div>
+{% endblock %}

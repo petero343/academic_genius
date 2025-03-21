@@ -1,14 +1,14 @@
 from django.urls import path
 from .views import (
     student_list, student_detail, generate_report_card, generate_results_report, 
-    student_login, student_dashboard, view_results, user_logout, home
+    student_login, student_dashboard, view_results, user_logout, home, report_card_preview, results_preview
 )
 
-#app_name = "students"
+
 
 urlpatterns = [
     # ✅ Home & Authentication
-    path("", home, name="home"),
+   # path("", home, name="home"),
     path("login/", student_login, name="student_login"),
     path("logout/", user_logout, name="user_logout"),
     
@@ -18,6 +18,10 @@ urlpatterns = [
     # ✅ Student Management
     path("students/", student_list, name="student_list"),  # ✅ Fix duplicate empty path
     path("students/<str:adm_number>/", student_detail, name="student_detail"),
+
+ # ✅ PREVIEW Pages
+    path("students/<str:adm_number>/report/preview/", report_card_preview, name="report_card_preview"),
+    path("students/<str:adm_number>/results/preview/", results_preview, name="results_preview"),
 
     # ✅ Reports & Results
     path("students/<str:adm_number>/report/", generate_report_card, name="generate_report_card"),
