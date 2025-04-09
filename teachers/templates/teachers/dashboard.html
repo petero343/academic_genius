@@ -1,37 +1,155 @@
-{% extends "base.html" %}
+{% extends "students/base.html" %}
+
 {% block content %}
+<div class="flex justify-end mt-3">
+    <a href="{% url 'teacher_login' %}" class="bg-red-600 text-white px-4 py-2x rounded-lg font-semibold shadow hover:bg-green-700 transition">
+        logout
+    </a>
+</div>
+
 <div class="container mx-auto p-8">
-    <h2 class="text-3xl font-bold mb-4">Teacher Dashboard</h2>
+    <h2 class="text-4xl font-bold mb-6 text-green-800">Teacher Dashboard </h2> 
 
-    <h3 class="text-xl font-semibold">Your Assigned Subjects:</h3>
-    <ul class="list-disc ml-6 mb-4">
-        {% for subject in assigned_subjects %}
-            <li>{{ subject.name }}</li>
-        {% endfor %}
-    </ul>
+    <!-- ✅ Teacher Details Section -->
+    <div class="mb-8 p-6 bg-white shadow-lg rounded-lg">
+        <h3 class="text-2xl font-semibold text-green-700 mb-4">Teacher Details</h3>
+        <table class="w-full border-collapse rounded-lg overflow-hidden shadow-lg">
+            <tr class="bg-green-700 text-white">
+                <th class="p-4">Name</th>
+                <th class="p-4">ID Number</th>
+                <th class="p-4">Email</th>
+                <th class="p-4">Assigned Subjects</th>
+                <th class="p-4">Avg Score (Your Subjects)</th>
+            </tr>
+            <tr class="text-gray-800 bg-gray-100">
+                <td class="p-4">{{ teacher.first_name }} {{ teacher.last_name }}</td>
+                <td class="p-4">{{ teacher.id_number }}</td>
+                <td class="p-4">{{ teacher.email }}</td>
+                <td class="p-4">
+                    {% for subject in assigned_subjects %}
+                        <span class="bg-green-200 text-green-800 px-3 py-1 rounded-md mr-1">{{ subject.name }}</span>
+                    {% empty %}
+                        <span class="text-gray-500">No subjects assigned</span>
+                    {% endfor %}
+                </td>
+                <td class="p-4 text-green-700 font-bold text-lg">{{ assigned_subject_avg }}</td>
+            </tr>
+        </table>
+    </div>
 
-    <h3 class="text-xl font-semibold">Your Students:</h3>
-    <table class="w-full border-collapse border border-gray-300">
+<!-- ✅ Your Students Table -->
+<div class="mb-8 p-6 bg-white shadow-lg rounded-lg">
+    <h3 class="text-2xl font-semibold text-green-700 mb-4">Your Students</h3>
+    <table class="w-full border-collapse rounded-lg overflow-hidden shadow-lg">
         <thead>
-            <tr class="bg-gray-200">
-                <th class="border p-2">Name</th>
-                <th class="border p-2">Admission Number</th>
-                <th class="border p-2">Actions</th>
+            <tr class="bg-green-700 text-white">
+                <th class="p-4">Name</th>
+                <th class="p-4">Admission Number</th>
+                <th class="p-4">Subject</th>
+                <th class="p-4">Score</th>
+                <th class="p-4">Actions</th>
             </tr>
         </thead>
         <tbody>
             {% for student in students %}
-            <tr>
-                <td class="border p-2">{{ student.first_name }} {{ student.last_name }}</td>
-                <td class="border p-2">{{ student.adm_number }}</td>
-                <td class="border p-2">
-                    <a href="{% url 'add_results' student.adm_number %}" class="text-blue-500">Add/Edit Results</a>
+            <tr class="border-b border-gray-200 text-gray-800 bg-gray-100">
+                <td class="p-4">{{ student.first_name }} {{ student.last_name }}</td>
+                <td class="p-4">{{ student.adm_number }}</td>
+
+                <!-- ✅ Show assigned subjects -->
+                <td class="p-4">
+                    {% for subject in teacher.assigned_subjects.all %}
+                        <span class="bg-green-200 text-green-800 px-3 py-1 rounded-md mr-1">{{ subject.name }}</span>
+                    {% empty %}
+                        <span class="text-gray-500">No subjects assigned</span>
+                    {% endfor %}
                 </td>
+
+                <td class="p-4">
+                    {% for subject in teacher.assigned_subjects.all %}
+                        {% with student.results.filter(course=subject) as filtered_results %}
+                            {% if filtered_results %}
+                                {% for result in filtered_results %}
+                                    {{ result.marks }}
+                                {% endfor %}
+                            {% else %}
+                                <span class="text-gray-500">No marks entered</span>
+                            {% endif %}
+                        {% endwith %}
+                    {% empty %}
+                        <span class="text-gray-500">No subjects assigned</span>
+                    {% endfor %}
+                </td>
+                
+<td class="p-4">
+    <a href="{% url 'add_results' student.id %}" class="text-green-600 font-semibold hover:underline">
+        Add/Edit Results
+    </a>
+</td>
             </tr>
             {% empty %}
-            <tr><td colspan="3" class="text-center p-4">No students found.</td></tr>
+            <tr>
+                <td colspan="5" class="text-center text-gray-500 p-6">No students found.</td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
+
+
+    <!-- ✅ Performance Analytics (Graph) Section -->
+    <div class="p-6 bg-white shadow-lg rounded-lg mt-6">
+        <h3 class="text-2xl font-semibold text-green-700 mb-4">Performance Analytics (All Subjects)</h3>
+        <canvas id="resultsChart"></canvas>
+    </div>
+
+    <!-- ✅ View All Results Button -->
+    <div class="flex justify-center mt-6">
+        <a href="{% url 'teacher_results' %}" class="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold shadow hover:bg-green-700 transition">
+            View All Results
+        </a>
+    </div>
+    </div>
+
+    
+<!-- ✅ JavaScript: Update Form Action Dynamically -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let form = document.getElementById("resultsForm");
+        let studentDropdown = document.getElementById("studentSelect");
+        studentDropdown.addEventListener("change", function () {
+            let studentId = this.value;
+            if (studentId) {
+                form.action = `/teachers/students/${studentId}/add_results/`;
+            }
+        });
+    });
+</script>
+
+<!-- ✅ Include Chart.js and Initialize Graph -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var ctx = document.getElementById("resultsChart").getContext("2d");
+        var chart = new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: {{ all_subjects|safe }},  // Overall subject names
+                datasets: [{
+                    label: "Average Score",
+                    data: {{ all_averages|safe }},  // Overall averages
+                    backgroundColor: "rgba(34, 139, 34, 0.6)",
+                    borderColor: "rgba(34, 139, 34, 1)",
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    });
+</script>
 {% endblock %}

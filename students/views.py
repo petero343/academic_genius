@@ -12,8 +12,9 @@ from reportlab.platypus import Table, TableStyle
 from reportlab.lib import colors
 import os
 
-from users.models import CustomUser
-from .models import Student, Result, Course
+# Removed unused import: CustomUser
+from .models import Student, Result  # Removed unused import: Course
+from .forms import StudentForm  # ✅ Import StudentForm
 from .utils import send_results_notification  # ✅ Import function
 
 # ✅ Home View
@@ -52,12 +53,12 @@ def student_dashboard(request):
 
     # Extract subjects and grades for Chart.js
     subjects = [result.course.name for result in results]
-    grades = [int(result.grade) for result in results]
+    grades = [int(result.marks) if result.marks is not None else 0 for result in results]
 
     context = {
         "student": student,
         "subjects": subjects,
-        "grades": grades,
+        "marks": grades,
     }
     return render(request, "students/dashboard.html", context)
 # ✅ Logout View
@@ -117,7 +118,7 @@ def add_results(request, student_id):
 
 # ✅ Generate PDF Report Card
 @login_required(login_url="student_login")
-def generate_report_card(request, adm_number):
+def generate_report_card(_, adm_number):  # Replaced unused parameter 'request' with '_'
     student = get_object_or_404(Student, adm_number=adm_number)
 
     response = HttpResponse(content_type="application/pdf")
@@ -136,7 +137,7 @@ def generate_report_card(request, adm_number):
 
 # ✅ Generate Student Results PDF
 @login_required(login_url="student_login")
-def generate_results_report(request, adm_number):
+def generate_results_report(_, adm_number):  # Replaced unused parameter 'request' with '_'
     student = get_object_or_404(Student, adm_number=adm_number)
     results = Result.objects.filter(student=student)
 
@@ -153,7 +154,7 @@ def generate_results_report(request, adm_number):
 
     # 🎯 **Title Section**
     p.setFillColor(lightgrey)
-    p.rect(50, height - 160, width - 70, 40, fill=True, stroke=False)
+    p.rect(30, height - 20, width - 70, 40, fill=True, stroke=False)
     p.setFillColor(blue)
     p.setFont("Helvetica-Bold", 20)
     p.drawString(180, height - 120, "Student Results Report")
@@ -169,18 +170,18 @@ def generate_results_report(request, adm_number):
     # 📚 **Results Table Header**
     p.setFont("Helvetica-Bold", 14)
     p.setFillColor(red)
-    p.drawString(100, height - 230, "Results:")
+    p.drawString(100, height - 240, "Results:")
 
     # 📝 **Prepare Table Data**
-    table_data = [["Course", "Grade"]]
+    table_data = [["Course", "Grade", "Marks"]]
     for result in results:
-        table_data.append([result.course.name, result.grade])
+        table_data.append([result.course.name, result.grade, result.marks])
 
     if not results:
         table_data.append(["No results available", "—"])
 
     # ✏️ **Table Style**
-    table = Table(table_data, colWidths=[300, 100])
+    table = Table(table_data, colWidths=[200, 100])
     table.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
         ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
@@ -193,8 +194,30 @@ def generate_results_report(request, adm_number):
 
     # 📌 **Draw Table**
     table.wrapOn(p, width, height)
-    table.drawOn(p, 100, height - 280)
+    table.drawOn(p, 100, height - 380)
 
     p.showPage()
     p.save()
     return response
+
+def delete_student(request, student_id):
+    student = get_object_or_404(Student, id=student_id)
+    if request.method == "POST":
+        student.delete()
+        return redirect("student_list")
+    
+    return render(request, "students/confirm_delete.html", {"student": student})
+def edit_student(request, student_id):
+    student = get_object_or_404(Student, id=student_id)  # Get the student instance
+
+    if request.method == 'POST':
+        form = StudentForm(request.POST, instance=student)  # Bind form to instance
+        if form.is_valid():
+            form.save()
+            return redirect('student_list')  # Redirect after saving
+    else:
+        form = StudentForm(instance=student)  # Pre-fill form with student data
+
+    return render(request, 'students/edit_student.html', {'form': form})
+    
+    #return render(request, "students/edit_student.html", {"form": form, "student": student})

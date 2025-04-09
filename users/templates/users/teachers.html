@@ -1,0 +1,60 @@
+{% extends 'users/admin_base.html' %}
+{% block content %}
+        <!-- Back Button (Uses JavaScript for Dynamic Back Navigation) -->
+        <button onclick="history.back()" class="bg-blue-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-blue-700 transition">
+            🔙 Back
+        </button>
+
+        <!-- Home Button -->
+        <a href="/" class="bg-green-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-green-700 transition">
+            🏠 Home
+        </a>
+
+<!-- Page Header -->
+<h2 class="text-3xl font-bold text-red-800">👨‍🏫 Manage Teachers</h2>
+
+<!-- Add Button -->
+<a href="{% url 'admin_add_teacher' %}" class="bg-red-600 text-white px-4 py-2 rounded-md my-4 inline-block hover:bg-red-700 transition">
+    ➕ Add New Teacher
+</a>
+
+<!-- Teachers List -->
+<div class="bg-white shadow-lg rounded-lg overflow-hidden mt-6">
+    <table class="w-full border-collapse">
+        <thead>
+            <tr class="bg-gray-100 text-red-900">
+                <th class="p-3 border">ID</th>
+                <th class="p-3 border">Name</th>
+                <th class="p-3 border">Email</th>
+                <th class="p-3 border">Subjects</th>
+                <th class="p-3 border">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for teacher in teachers %}
+            <tr class="hover:bg-gray-200 transition">
+                <td class="p-3 border text-gray-700">{{ teacher.id }}</td>
+                <td class="p-3 border text-gray-700">{{ teacher.first_name }} {{ teacher.last_name }}</td>
+                <td class="p-3 border text-gray-700">{{ teacher.email }}</td>
+                <td class="p-3 border text-gray-700">
+                    {% if teacher.assigned_subjects.all %}
+                        {{ teacher.assigned_subjects.all|join:", " }}
+                    {% else %}
+                        <span class="text-gray-400">No subjects assigned</span>
+                    {% endif %}
+                </td>
+                <td class="p-3 border text-center">
+                    <a href="{% url 'admin_edit_teacher' teacher.id %}" class="text-red-700 hover:text-red-600 transition">✏️ Edit</a> |
+                    <a href="{% url 'admin_delete_teacher' teacher.id %}" class="text-red-700 hover:text-red-600 transition">🗑 Delete</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="p-4 text-center text-gray-400">No teachers available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

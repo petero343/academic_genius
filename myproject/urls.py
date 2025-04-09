@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from students.views import home
-from users.views import custom_admin_login
+from users.views import admin_login
 urlpatterns = [
     # ✅ Admin Panel
     path("admin/", admin.site.urls),
@@ -11,11 +11,11 @@ urlpatterns = [
     # ✅ Student URLs
     path("students/", include("students.urls")),  # ✅ Ensure students URLs are included
 
-    path('admin/login/', custom_admin_login, name='custom_admin_login'),
+    path('admin/login/', admin_login, name='custom_admin_login'),
 
     # ✅ Teacher URLs
     path("teachers/", include("teachers.urls")),
 
-    path('', include('users.urls')),  # Include users app URLs
+    path('users/', include('users.urls')),  # Include users app URLs
 
 ]

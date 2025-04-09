@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Shiners Academy</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        body {
+            background-color: #1a1a2e; /* Dark background */
+            color: #e0e0e0; /* Light text */
+        }
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .card {
+            background-color: #222; /* Dark card */
+            border: 1px solid #333;
+        }
+    </style>
+</head>
+<body class="font-sans">
+    <!-- ✅ Top Navigation -->
+    <nav class="bg-[#0F172A] text-white p-4 shadow-lg flex justify-between">
+        <a href="{% url 'custom_admin_dashboard' %}" class="text-lg font-bold">🎛 Admin Dashboard</a>
+        <div>
+            <a href="{% url 'manage_teachers' %}" class="nav-link px-4 py-2 rounded-md">👨‍🏫 Teachers</a>
+            <a href="{% url 'manage_students' %}" class="nav-link px-4 py-2 rounded-md">👨‍🎓 Students</a>
+            <a href="{% url 'manage_courses' %}" class="nav-link px-4 py-2 rounded-md">📚 Courses</a>
+            <a href="{% url 'login' %}" class="nav-link px-4 py-2 rounded-md text-red-400">🚪 Logout</a>
+        </div>
+    </nav>
+
+    <!-- ✅ Page Content -->
+    <div class="container mx-auto p-6">
+        {% block content %} {% endblock %}
+    </div>
+</body>
+</html>

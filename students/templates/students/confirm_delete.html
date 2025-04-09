@@ -1,0 +1,23 @@
+{% extends "users/admin_dashboard.html" %}
+{% block content %}
+<div class="min-h-screen bg-gray-900 text-white p-6">
+    <h1 class="text-3xl font-bold mb-4">Delete Student</h1>
+    <p>Are you sure you want to delete {{ student.first_name }} {{ student.last_name }}?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded">Confirm Delete</button>
+        <a href="{% url 'student_list' %}" class="ml-4 text-blue-400 hover:underline">Cancel</a>
+    </form>
+</div>
+{% endblock %}
+
+<nav class="bg-blue-500 p-4 text-white flex justify-between">
+    <a href="{% url 'home' %}" class="text-lg font-bold">🏠 Home</a>
+    <div>
+        <a href="javascript:history.back()" class="px-4">⬅️ Back</a>
+        <a href="{% url 'dashboard' %}" class="px-4">📊 Dashboard</a>
+    </div>
+</nav>
+
+<a href="javascript:history.back()" class="text-blue-600 hover:underline">🔙 Back</a>
+<a href="{% url 'home' %}" class="text-blue-600 hover:underline">🏠 Home</a>

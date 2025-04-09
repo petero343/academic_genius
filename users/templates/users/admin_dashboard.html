@@ -1,0 +1,61 @@
+{% extends 'users/admin_base.html' %}
+
+{% block content %}
+<!-- 🌟 Welcome Section -->
+<div class="flex flex-col md:flex-row justify-between items-center bg-[#F5E6E8] p-6 rounded-lg shadow-lg mb-8">
+    <div class="text-3xl font-bold text-green-700">Welcome, Admin 👋</div>
+    
+    <div class="flex space-x-4 mt-4 md:mt-0">
+        <!-- 🔙 Back Button -->
+        <button onclick="history.back()" class="bg-blue-600 text-white px-6 py-3 rounded-lg shadow-md hover:bg-blue-700 transition">
+            🔙 Back
+        </button>
+
+        <!-- 🏠 Home Button -->
+        <a href="/" class="bg-green-600 text-white px-6 py-3 rounded-lg shadow-md hover:bg-green-700 transition">
+            🏠 Home
+        </a>
+
+        <!-- 🛠 Default Admin Panel -->
+        <a href="/admin/" target="_blank" class="bg-gray-800 text-white px-6 py-3 rounded-lg shadow-md hover:bg-gray-900 transition">
+            🛠 Open Default Admin
+        </a>
+
+        <!-- 🚪 Logout -->
+        <a href="{% url 'custom_admin_logout' %}" class="bg-red-600 text-white px-6 py-3 rounded-lg shadow-md hover:bg-red-700 transition">
+            🚪 Logout
+        </a>
+    </div>
+</div>
+
+<!-- 📌 Dashboard Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <!-- 👨‍🏫 Teachers -->
+    <div class="p-8 bg-white rounded-lg shadow-lg border border-green-400 hover:shadow-2xl transition">
+        <h3 class="text-2xl font-bold text-green-800">👨‍🏫 Teachers</h3>
+        <p class="text-lg text-gray-700 mt-2">{{ total_teachers }} Registered</p>
+        <a href="{% url 'manage_teachers' %}" class="mt-4 inline-block text-green-600 font-semibold hover:underline">Manage</a>
+    </div>
+
+    <!-- 👨‍🎓 Students -->
+    <div class="p-8 bg-white rounded-lg shadow-lg border border-blue-400 hover:shadow-2xl transition">
+        <h3 class="text-2xl font-bold text-blue-800">👨‍🎓 Students</h3>
+        <p class="text-lg text-gray-700 mt-2">{{ total_students }} Enrolled</p>
+        <a href="{% url 'manage_students' %}" class="mt-4 inline-block text-blue-600 font-semibold hover:underline">Manage</a>
+    </div>
+
+    <!-- 📚 Courses -->
+    <div class="p-8 bg-white rounded-lg shadow-lg border border-yellow-400 hover:shadow-2xl transition">
+        <h3 class="text-2xl font-bold text-yellow-800">📚 Courses</h3>
+        <p class="text-lg text-gray-700 mt-2">{{ total_courses }} Available</p>
+        <a href="{% url 'manage_courses' %}" class="mt-4 inline-block text-yellow-600 font-semibold hover:underline">Manage</a>
+    </div>
+</div>
+
+<!-- 📌 Footer -->
+<footer class="mt-12 bg-[#F5E6E8] p-6 text-center text-gray-800 rounded-lg shadow-md">
+    <p class="text-lg">&copy; 2025 Shiners Academy. All rights reserved.</p>
+    <p class="text-sm">Developed with 💚 by <span class="text-green-700 font-semibold">Academic Genius</span></p>
+</footer>
+
+{% endblock %}

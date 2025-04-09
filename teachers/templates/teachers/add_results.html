@@ -1,0 +1,64 @@
+{% extends "students/base.html" %}
+
+{% block content %}
+<div class="container mx-auto p-8">
+    <h2 class="text-3xl font-bold text-green-800 mb-6">Add/Edit Results for {{ student.first_name }} {{ student.last_name }}</h2>
+
+    <div class="bg-white p-6 shadow-lg rounded-lg">
+        <form method="POST">
+            {% csrf_token %}
+
+            <!-- 🔹 Student Name -->
+            <label class="block mb-4">
+                <span class="text-gray-700">Student:</span>
+                <input type="text" value="{{ student.first_name }} {{ student.last_name }}" class="block w-full p-2 border rounded-lg bg-gray-100" readonly>
+            </label>
+
+            <!-- 🔹 Course Selection -->
+            <label class="block mb-4">
+                <span class="text-gray-700">Course:</span>
+                <select name="course_id" class="block w-full p-2 border rounded-lg">
+                    {% for subject in assigned_subjects %}
+                        <option value="{{ subject.id }}" {% if subject.id == selected_course_id %}selected{% endif %}>
+                            {{ subject.name }}
+                        </option>
+                    {% empty %}
+                        <option disabled>No courses assigned</option>
+                    {% endfor %}
+                </select>
+            </label>
+
+<!-- 🔹 Grade Input -->
+<label class="block mb-4">
+    <span class="text-gray-700">Grade:</span>
+    <input id="marks" type="number" name="marks" value="{{ existing_result.marks|default_if_none:'' }}" class="block w-full p-2 border rounded-lg" placeholder="Enter marks (0-100)" required>
+    <p id="error-message" class="text-red-600 text-sm mt-2 hidden">Marks must be between 0 and 100.</p>
+</label>
+
+<!-- 🔹 Submit Button -->
+<button type="submit" class="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold shadow hover:bg-green-700 transition">
+    Save Result
+</button>
+
+<script>
+    document.querySelector('form').addEventListener('submit', function(event) {
+        var marks = document.getElementById('marks').value;
+        var errorMessage = document.getElementById('error-message');
+        
+        if (marks < 0 || marks > 100) {
+            errorMessage.classList.remove('hidden');
+            event.preventDefault(); // Prevent form submission
+        } else {
+            errorMessage.classList.add('hidden');
+        }
+    });
+</script>
+
+            <!-- 🔹 Back Button -->
+            <a href="{% url 'teacher_dashboard' %}" class="ml-4 text-gray-600 hover:text-gray-800">
+                Cancel
+            </a>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "users/admin_base.html" %}
+
+{% block content %}
+<div class="p-6 bg-white shadow-md rounded-lg">
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-bold text-gray-800">Student List</h2>
+        <a href="{% url 'admin_add_student' %}" 
+           class="bg-blue-600 text-white font-semibold px-4 py-2 rounded hover:bg-blue-700 transition">
+            ➕ Add New Student
+        </a>
+    </div>
+        <!-- Back Button (Uses JavaScript for Dynamic Back Navigation) -->
+        <button onclick="history.back()" class="bg-blue-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-blue-700 transition">
+            🔙 Back
+        </button>
+
+        <!-- Home Button -->
+        <a href="/" class="bg-green-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-green-700 transition">
+            🏠 Home
+        </a>
+
+    <table class="w-full border-collapse border border-gray-300 shadow-md rounded-lg">
+        <thead>
+            <tr class="bg-blue-700 text-white text-center font-semibold">
+                <th class="border border-gray-300 px-4 py-2">#</th>
+                <th class="border border-gray-300 px-4 py-2">First Name</th>
+                <th class="border border-gray-300 px-4 py-2">Last Name</th>
+                <th class="border border-gray-300 px-4 py-2">Adm No.</th>
+                <th class="border border-gray-300 px-4 py-2">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr class="text-center bg-gray-100 hover:bg-gray-200 transition">
+                <td class="border border-gray-300 px-4 py-2 font-bold text-gray-900">{{ forloop.counter }}</td>
+                <td class="border border-gray-300 px-4 py-2 font-medium text-gray-800">{{ student.first_name }}</td>
+                <td class="border border-gray-300 px-4 py-2 font-medium text-gray-800">{{ student.last_name }}</td>
+                <td class="border border-gray-300 px-4 py-2 font-bold text-gray-900">{{ student.adm_number }}</td>
+
+                <td class="border border-gray-300 px-4 py-2">
+                    {% if student.id %}
+                        <a href="{% url 'admin_edit_student' student.id %}" class="text-blue-600 font-semibold hover:underline">✏️ Edit</a> |
+                        <a href="{% url 'admin_delete_student' student.id %}" class="text-red-600 font-semibold hover:underline"
+                           onclick="return confirm('Are you sure you want to delete this student?');">🗑 Delete</a>
+                    {% else %}
+                        <span class="text-gray-500">No Actions Available</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center text-gray-700 font-semibold py-4">No students found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

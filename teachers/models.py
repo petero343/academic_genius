@@ -28,6 +28,7 @@ class Teacher(models.Model):
     email = models.EmailField(unique=True)
     assigned_subjects = models.ManyToManyField("students.Course")
     date_joined = models.DateField(auto_now_add=True)
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         """ Automatically create a user account for a teacher upon saving. """
@@ -45,8 +46,11 @@ class Teacher(models.Model):
                     "role": "teacher",
                 },
             )
-            user.set_password("password123")  # Set a default password (Changeable later)
-            user.save()
+            if created:
+                user.set_password("password123")  # Set a default password (Changeable later)
+                user.save()
+            self.user = user  # Explicitly link the CustomUser instance to the Teacher
+            super().save(update_fields=["user"])  # Update the user field in the database
 
     USERNAME_FIELD = "id_number"  # Teachers log in with ID number
     REQUIRED_FIELDS = ["email", "first_name", "last_name"]

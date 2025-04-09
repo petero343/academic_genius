@@ -1,0 +1,13 @@
+{% extends "users/admin_base.html" %}
+
+{% block content %}
+<h2 class="text-2xl font-bold text-red-500">🗑 Confirm Delete</h2>
+
+<p class="mt-4 text-gray-700">Are you sure you want to delete <strong>{{ student.first_name }} {{ student.last_name }}</strong>?</p>
+
+<form method="POST" class="mt-4">
+    {% csrf_token %}
+    <button type="submit" class="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-700">Yes, Delete</button>
+    <a href="{% url 'manage_students' %}" class="ml-4 text-gray-500 hover:underline">Cancel</a>
+</form>
+{% endblock %}

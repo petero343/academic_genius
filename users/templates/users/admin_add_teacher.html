@@ -1,0 +1,70 @@
+{% extends 'users/admin_base.html' %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md">
+    <h2 class="text-3xl font-bold text-blue-600 mb-6">➕ Add New Teacher</h2>
+
+    <form method="POST" class="space-y-4">
+        {% csrf_token %}
+
+        <!-- First Name -->
+        <div>
+            <label class="block text-gray-700 font-bold">First Name</label>
+            <input type="text" name="first_name" required
+                   class="w-full px-4 py-2 border rounded-md focus:ring focus:ring-blue-300">
+        </div>
+
+        <!-- Last Name -->
+        <div>
+            <label class="block text-gray-700 font-bold">Last Name</label>
+            <input type="text" name="last_name" required
+                   class="w-full px-4 py-2 border rounded-md focus:ring focus:ring-blue-300">
+        </div>
+
+        <!-- ID Number -->
+        <div>
+            <label class="block text-gray-700 font-bold">ID Number</label>
+            <input type="text" name="id_number" required
+                   class="w-full px-4 py-2 border rounded-md focus:ring focus:ring-blue-300">
+        </div>
+
+        <!-- Email -->
+        <div>
+            <label class="block text-gray-700 font-bold">Email</label>
+            <input type="email" name="email" required
+                   class="w-full px-4 py-2 border rounded-md focus:ring focus:ring-blue-300">
+        </div>
+
+        <!-- Assigned Subjects -->
+        <div>
+            <label class="block text-gray-700 font-bold">Assigned Subjects</label>
+            <input type="text" name="assigned_subjects" placeholder="E.g., Mathematics, Physics"
+                   class="w-full px-4 py-2 border rounded-md focus:ring focus:ring-blue-300">
+        </div>
+
+        <!-- Date Joined -->
+        <div>
+            <label class="block text-gray-700 font-bold">Date Joined</label>
+            <input type="date" name="date_joined" required
+                   class="w-full px-4 py-2 border rounded-md focus:ring focus:ring-blue-300">
+        </div>
+
+        <!-- Submit Button -->
+        <div class="text-center">
+            <button type="submit"
+                    class="bg-blue-600 text-white px-6 py-2 rounded-md font-bold hover:bg-blue-700">
+                ✅ Add Teacher
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+        <!-- Back Button (Uses JavaScript for Dynamic Back Navigation) -->
+        <button onclick="history.back()" class="bg-blue-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-blue-700 transition">
+            🔙 Back
+        </button>
+
+        <!-- Home Button -->
+        <a href="/" class="bg-green-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-green-700 transition">
+            🏠 Home
+        </a>

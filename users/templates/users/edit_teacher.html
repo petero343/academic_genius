@@ -1,0 +1,24 @@
+{% extends 'users/admin_base.html' %}
+
+{% block content %}
+<h2 class="text-2xl font-bold text-blue-400">✏️ Edit Teacher</h2>
+
+<form method="POST" class="mt-4">
+    {% csrf_token %}
+    <label class="block">First Name:</label>
+    <input type="text" name="first_name" value="{{ teacher.first_name }}" class="border p-2 w-full">
+
+    <label class="block mt-2">Last Name:</label>
+    <input type="text" name="last_name" value="{{ teacher.last_name }}" class="border p-2 w-full">
+
+    <label class="block mt-2">Email:</label>
+    <input type="email" name="email" value="{{ teacher.email }}" class="border p-2 w-full">
+
+    <label class="block mt-2">Assigned Subjects:</label>
+    <input type="text" name="assigned_subjects" value="{{ teacher.assigned_subjects }}" class="border p-2 w-full">
+
+    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md mt-4">✅ Save Changes</button>
+</form>
+
+<a href="{% url 'manage_teachers' %}" class="text-gray-400 hover:underline mt-4 block">← Back to Teachers</a>
+{% endblock %}

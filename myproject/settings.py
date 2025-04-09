@@ -65,7 +65,7 @@ ROOT_URLCONF = 'myproject.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        "DIRS": [BASE_DIR / "templates"],  # ✅ Make sure Django checks this directory
+        'DIRS': [os.path.join(BASE_DIR, "templates")],  # Ensure this path is correct
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -100,6 +100,12 @@ SESSION_ENGINE = "django.contrib.sessions.backends.db"  # ✅ Store sessions in 
 SESSION_COOKIE_AGE = 86400  # 1 day (optional)
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_SAVE_EVERY_REQUEST = True
+# ✅ Separate login URLs for different user types
+LOGIN_URLS = {
+    "teacher": "/teachers/login/",
+    "student": "/students/login/",
+    "admin": "/admin/login/",
+}
 
 LOGIN_REDIRECT_URL = "/dashboard/"
 LOGOUT_REDIRECT_URL = "/login/"
@@ -126,6 +132,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# settings.py
+TEACHERS_LOGIN_URL = "/teachers/login/"  # Exclusive to teachers
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
